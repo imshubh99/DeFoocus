@@ -170,6 +170,11 @@ with shared.gradio_root:
 
                 image_number = gr.Slider(label='Image Number', minimum=1, maximum=modules.config.default_max_image_number, step=1, value=modules.config.default_image_number)
 
+                negative_prompt = gr.Textbox(label='Negative Prompt', show_label=True, placeholder="Type prompt here.",
+                                             info='Describing what you do not want to see.', lines=2,
+                                             elem_id='negative_prompt',
+                                             value=modules.config.default_prompt_negative)
+
             with gr.Tab(label='Styles'):
                 style_sorter.try_load_sorted_styles(
                     style_names=legal_style_names,
@@ -267,4 +272,4 @@ shared.gradio_root.launch(
     favicon_path="assets/favicon.png",
     auth=check_auth if (args_manager.args.share or args_manager.args.listen) and auth_enabled else None,
     blocked_paths=[constants.AUTH_FILENAME]
-)
+    )
