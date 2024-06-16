@@ -115,43 +115,18 @@ with shared.gradio_root:
 
             with gr.Row(visible=True) as image_input_panel:
                 with gr.Tabs():
-                    with gr.TabItem(label='Clothes/Accessories') as ip_tab:
+                    with gr.TabItem(label='Clothes/Accessories'):
                         with gr.Row():
                             ip_images = []
-                            ip_types = []
-                            ip_stops = []
-                            ip_weights = []
-                            ip_ctrls = []
-                            ip_ad_cols = []
-                            for _ in range(flags.controlnet_image_count):
+                            for _ in range(4):
                                 with gr.Column():
                                     ip_image = grh.Image(label='Image', source='upload', type='numpy', show_label=False, height=300)
                                     ip_images.append(ip_image)
-                                    ip_ctrls.append(ip_image)
-                                    with gr.Column(visible=True) as ad_col:
-                                        with gr.Row():
-                                            default_end, default_weight = flags.default_parameters[flags.default_ip]
-
-                                            ip_stop = gr.Slider(label='Stop At', minimum=0.0, maximum=1.0, step=0.001, value=0.85)
-                                            ip_stops.append(ip_stop)
-                                            ip_ctrls.append(ip_stop)
-
-                                            ip_weight = gr.Slider(label='Weight', minimum=0.0, maximum=2.0, step=0.001, value=0.975)
-                                            ip_weights.append(ip_weight)
-                                            ip_ctrls.append(ip_weight)
-
-                                        ip_type = gr.Radio(label='Type', choices=flags.ip_list, value=flags.default_ip, container=False)
-                                        ip_types.append(ip_type)
-                                        ip_ctrls.append(ip_type)
-
-                                        ip_type.change(lambda x: flags.default_parameters[x], inputs=[ip_type], outputs=[ip_stop, ip_weight], queue=False, show_progress=False)
-                                    ip_ad_cols.append(ad_col)
                             
-                    with gr.TabItem(label='Person Image') as inpaint_tab:
+                    with gr.TabItem(label='Person Image'):
                         with gr.Row():
                             with gr.Column():
-                                inpaint_input_image = grh.Image(label='Drag person image here', source='upload', type='numpy', tool='sketch', height=500, brush_color="#FFFFFF", elem_id='inpaint_canvas')
-                                inpaint_mode = gr.Dropdown(choices=modules.flags.inpaint_options, value=modules.flags.inpaint_option_default, label='Method', visible=False)
+                                inpaint_input_image = grh.Image(label='Drag person image here', source='upload', type='numpy', height=500)
 
         with gr.Column(scale=1, visible=True):
             with gr.Tab(label='Settings'):
@@ -164,21 +139,9 @@ with shared.gradio_root:
                                             value='realistic',
                                             interactive=True)
                 
-                aspect_ratios_selection = gr.Radio(label='Aspect Ratios', choices=['1024×1024', '1152×896', '1344×768', '1408×704'],
+                aspect_ratios_selection = gr.Radio(label='Aspect Ratios', choices=['1152×896', '1024×1024', '1408×704'],
                                                    value='1152×896', info='width × height',
                                                    elem_classes='aspect_ratios')
-
-                image_number = gr.Slider(label='Image Number', minimum=1, maximum=modules.config.default_max_image_number, step=1, value=modules.config.default_image_number)
-
-                negative_prompt = gr.Textbox(label='Negative Prompt', show_label=True, placeholder="Type prompt here.",
-                                             info='Describing what you do not want to see.', lines=2,
-                                             elem_id='negative_prompt',
-                                             value=modules.config.default_prompt_negative)
-
-                overwrite_step = gr.Slider(label='Forced Overwrite of Sampling Step',
-                                           minimum=-1, maximum=200, step=1,
-                                           value=modules.config.default_overwrite_step,
-                                           info='Set as -1 to disable. For developer debugging.')
 
             with gr.Tab(label='Styles'):
                 style_sorter.try_load_sorted_styles(
@@ -224,50 +187,23 @@ with shared.gradio_root:
 
         state_is_generating = gr.State(False)
 
-        load_data_outputs = [image_number, prompt, negative_prompt, style_selections,
-                             performance_selection, overwrite_step, overwrite_switch, aspect_ratios_selection,
-                             overwrite_width, overwrite_height, guidance_scale, sharpness, adm_scaler_positive,
-                             adm_scaler_negative, adm_scaler_end, refiner_swap_method, adaptive_cfg, base_model,
-                             refiner_model, refiner_switch, sampler_name, scheduler_name, seed_random, image_seed,
-                             generate_button, load_parameter_button] + freeu_ctrls + lora_ctrls
+        mixing_image_prompt_and_inpaint = gr.Checkbox(label='Mixing Image Prompt and Inpaint',
+                                                      value=True, visible=False)
 
-        preset_selection.change(lambda preset: modules.meta_parser.load_parameter_button_click(preset, state_is_generating),
-                                inputs=preset_selection, outputs=load_data_outputs, queue=False, show_progress=False)
-
-        performance_selection.change(lambda x: [gr.update(interactive=x != 'Extreme Speed')] * 11 +
-                                               [gr.update(visible=x != 'Extreme Speed')] * 1 +
-                                               [gr.update(interactive=x != 'Extreme Speed', value=x == 'Extreme Speed', )] * 1,
-                                     inputs=performance_selection,
-                                     outputs=[
-                                         guidance_scale, sharpness, adm_scaler_end, adm_scaler_positive,
-                                         adm_scaler_negative, refiner_switch, refiner_model, sampler_name,
-                                         scheduler_name, adaptive_cfg, refiner_swap_method, negative_prompt, disable_intermediate_results
-                                     ], queue=False, show_progress=False)
-        
-        output_format.input(lambda x: gr.update(output_format=x), inputs=output_format)
-
-        ctrls = [currentTask, generate_image_grid]
+        ctrls = [currentTask]
         ctrls += [
-            prompt, negative_prompt, translate_prompts, style_selections,
-            performance_selection, aspect_ratios_selection, image_number, output_format, image_seed, sharpness, guidance_scale
+            prompt, style_selections,
+            performance_selection, aspect_ratios_selection,
         ]
-        ctrls += [inpaint_input_image, inpaint_additional_prompt, inpaint_mask_image]
-        ctrls += [disable_preview, disable_intermediate_results, black_out_nsfw]
-        ctrls += [adm_scaler_positive, adm_scaler_negative, adm_scaler_end, adaptive_cfg]
-        ctrls += [sampler_name, scheduler_name]
-        ctrls += [overwrite_step, overwrite_switch, overwrite_width, overwrite_height, overwrite_vary_strength]
-        ctrls += [overwrite_upscale_strength, mixing_image_prompt_and_vary_upscale, mixing_image_prompt_and_inpaint]
-        ctrls += freeu_ctrls
-        ctrls += ip_ctrls
+        ctrls += ip_images + [inpaint_input_image]
+        ctrls += [mixing_image_prompt_and_inpaint]
 
         generate_button.click(lambda: (gr.update(visible=True, interactive=True), gr.update(visible=True, interactive=True), gr.update(visible=False, interactive=False), [], True),
                               outputs=[stop_button, skip_button, generate_button, gallery, state_is_generating]) \
-            .then(fn=refresh_seed, inputs=[seed_random, image_seed], outputs=image_seed) \
             .then(fn=get_task, inputs=ctrls, outputs=currentTask) \
             .then(fn=generate_clicked, inputs=currentTask, outputs=[progress_html, progress_window, progress_gallery, gallery]) \
             .then(lambda: (gr.update(visible=True, interactive=True), gr.update(visible=False, interactive=False), gr.update(visible=False, interactive=False), False),
-                  outputs=[generate_button, stop_button, skip_button, state_is_generating]) \
-            .then(fn=update_history_link, outputs=history_link)
+                  outputs=[generate_button, stop_button, skip_button, state_is_generating])
 
 shared.gradio_root.launch(
     inbrowser=args_manager.args.in_browser,
@@ -277,4 +213,4 @@ shared.gradio_root.launch(
     favicon_path="assets/favicon.png",
     auth=check_auth if (args_manager.args.share or args_manager.args.listen) and auth_enabled else None,
     blocked_paths=[constants.AUTH_FILENAME]
-    )
+)
