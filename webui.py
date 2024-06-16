@@ -175,6 +175,11 @@ with shared.gradio_root:
                                              elem_id='negative_prompt',
                                              value=modules.config.default_prompt_negative)
 
+                overwrite_step = gr.Slider(label='Forced Overwrite of Sampling Step',
+                                           minimum=-1, maximum=200, step=1,
+                                           value=modules.config.default_overwrite_step,
+                                           info='Set as -1 to disable. For developer debugging.')
+
             with gr.Tab(label='Styles'):
                 style_sorter.try_load_sorted_styles(
                     style_names=legal_style_names,
