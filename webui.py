@@ -115,7 +115,7 @@ css = """
     }
 """
 
-with gr.Blocks(title=title, css=css) as demo:
+with gr.Blocks(title=title, css=css).queue() as demo:
     gr.Markdown(description)
     
     with gr.Tab("Free Version"):
