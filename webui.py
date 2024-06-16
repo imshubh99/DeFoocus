@@ -167,6 +167,9 @@ with shared.gradio_root:
                 aspect_ratios_selection = gr.Radio(label='Aspect Ratios', choices=['1024×1024', '1152×896', '1344×768', '1408×704'],
                                                    value='1152×896', info='width × height',
                                                    elem_classes='aspect_ratios')
+
+                image_number = gr.Slider(label='Image Number', minimum=1, maximum=modules.config.default_max_image_number, step=1, value=modules.config.default_image_number)
+
             with gr.Tab(label='Styles'):
                 style_sorter.try_load_sorted_styles(
                     style_names=legal_style_names,
