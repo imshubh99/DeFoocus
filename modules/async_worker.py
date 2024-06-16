@@ -470,7 +470,7 @@ def worker():
 
             if use_expansion:
                 for i, t in enumerate(tasks):
-                    progressbar(async_task, 5, f'Preparing Fooocus text #{i + 1} ...')
+                    progressbar(async_task, 5, f'Preparing fashionCORE text #{i + 1} ...')
                     expansion = pipeline.final_expansion(t['task_prompt'], t['task_seed'])
                     print(f'[Prompt Expansion] {expansion}')
                     t['expansion'] = expansion
