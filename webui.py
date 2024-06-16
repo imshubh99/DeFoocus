@@ -35,7 +35,87 @@ def generate_segmentation_mask(image):
 title = "FashionCore"
 description = "Try on different clothes and accessories on your images."
 
-with gr.Blocks(title=title, css=config.css) as demo:
+css = """
+    .gradio-container {
+        font-family: Arial, sans-serif;
+        background-color: #f5f5f5;
+        padding: 20px;
+    }
+    
+    .gradio-button {
+        background-color: #007bff;
+        color: #fff;
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    
+    .gradio-input {
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+    
+    .gradio-image {
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+    
+    .gradio-gallery {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        grid-gap: 10px;
+    }
+    
+    .gradio-tabs {
+        margin-bottom: 20px;
+    }
+    
+    .gradio-tab-active {
+        background-color: #007bff;
+        color: #fff;
+    }
+    
+    .gradio-accordion {
+        margin-bottom: 20px;
+    }
+    
+    .gradio-accordion-header {
+        background-color: #f1f1f1;
+        padding: 10px;
+        cursor: pointer;
+    }
+    
+    .gradio-accordion-content {
+        padding: 10px;
+    }
+    
+    .gradio-checkbox {
+        margin-right: 10px;
+    }
+    
+    .gradio-checkbox-label {
+        font-weight: bold;
+    }
+    
+    .gradio-slider {
+        width: 100%;
+    }
+    
+    .gradio-slider-label {
+        font-weight: bold;
+    }
+    
+    .gradio-radio {
+        margin-right: 10px;
+    }
+    
+    .gradio-radio-label {
+        font-weight: bold;
+    }
+"""
+
+with gr.Blocks(title=title, css=css) as demo:
     gr.Markdown(description)
     
     with gr.Tab("Free Version"):
