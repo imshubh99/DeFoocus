@@ -30,12 +30,14 @@ PHOTOPEA_IFRAME_HEIGHT = 684
 PHOTOPEA_IFRAME_WIDTH = "100%"
 PHOTOPEA_IFRAME_LOADED_EVENT = "onPhotopeaLoaded"
 
+
 def get_photopea_url_params():
     return "#%7B%22resources%22:%5B%22data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAgAAAAIAAQMAAADOtka5AAAAAXNSR0IB2cksfwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAANQTFRF////p8QbyAAAADZJREFUeJztwQEBAAAAgiD/r25IQAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAfBuCAAAB0niJ8AAAAABJRU5ErkJggg==%22%5D%7D"
 
 def get_task(*args):
     args = list(args)
     args.pop(0)
+
     return worker.AsyncTask(args=args)
 
 def generate_clicked(task):
@@ -48,9 +50,9 @@ def generate_clicked(task):
     finished = False
 
     yield gr.update(visible=True, value=modules.html.make_progress_html(1, 'Waiting for task to start ...')), \
-          gr.update(visible=True, value=None), \
-          gr.update(visible=False, value=None), \
-          gr.update(visible=False)
+        gr.update(visible=True, value=None), \
+        gr.update(visible=False, value=None), \
+        gr.update(visible=False)
 
     worker.async_tasks.append(task)
 
@@ -75,7 +77,7 @@ def generate_clicked(task):
                 yield gr.update(visible=True), \
                     gr.update(visible=True), \
                     gr.update(visible=True, value=product), \
-                    gr.update(visible(False)
+                    gr.update(visible=False)
             if flag == 'finish':
                 yield gr.update(visible=False), \
                     gr.update(visible=False), \
@@ -93,6 +95,7 @@ def generate_clicked(task):
     time_taken = f"Total time: {execution_time:.2f} seconds"
     print(time_taken)
     return
+
 
 reload_javascript()
 
@@ -157,14 +160,14 @@ with shared.gradio_root:
                     def stop_clicked(currentTask):
                         import ldm_patched.modules.model_management as model_management
                         currentTask.last_stop = 'stop'
-                        if currentTask.processing:
+                        if (currentTask.processing):
                             model_management.interrupt_current_processing()
                         return currentTask
 
                     def skip_clicked(currentTask):
                         import ldm_patched.modules.model_management as model_management
                         currentTask.last_stop = 'skip'
-                        if currentTask.processing:
+                        if (currentTask.processing):
                             model_management.interrupt_current_processing()
                         return currentTask
 
@@ -227,9 +230,9 @@ with shared.gradio_root:
                                                                  value=modules.config.default_inpaint_mask_model,
                                                                  visible=False)
                                 inpaint_mask_cloth_category = gr.Dropdown(label='Cloth category',
-                                                                          choices=flags.inpaint_mask_cloth_category,
-                                                                          value=modules.config.default_inpaint_mask_cloth_category,
-                                                                          visible=False)
+                                                             choices=flags.inpaint_mask_cloth_category,
+                                                             value=modules.config.default_inpaint_mask_cloth_category,
+                                                             visible=False)
                                 inpaint_mask_sam_prompt_text = gr.Textbox(label='Segmentation prompt', value='', visible=False)
                                 with gr.Accordion("Advanced options", visible=False, open=False) as inpaint_mask_advanced_options:
                                     inpaint_mask_sam_model = gr.Dropdown(label='SAM model', choices=flags.inpaint_mask_sam_model, value=modules.config.default_inpaint_mask_sam_model)
@@ -318,8 +321,8 @@ with shared.gradio_root:
                                              elem_id='negative_prompt',
                                              value=modules.config.default_prompt_negative)
                 translate_prompts = gr.Checkbox(label='Translate Prompts',
-                                                info='Uses the internet to translate prompts to English.',
-                                                value=False)
+                                                          info='Uses the internet to translate prompts to English.',
+                                                          value=False)
                 seed_random = gr.Checkbox(label='Randomize seed', value=True)
                 image_seed = gr.Textbox(label='Seed', value=0, max_lines=1, visible=False) # workaround for https://github.com/gradio-app/gradio/issues/5354
 
@@ -431,8 +434,8 @@ with shared.gradio_root:
                                       info='Higher value means image and texture are sharper.')
                 gr.HTML('<a href="https://github.com/lllyasviel/Fooocus/discussions/117" target="_blank">\U0001F4D4 Document</a>')
                 output_format = gr.Radio(label='Output Format',
-                                         choices=modules.flags.output_formats,
-                                         value=modules.config.default_output_format)
+                                            choices=modules.flags.output_formats,
+                                            value=modules.config.default_output_format)
 
                 dev_mode = gr.Checkbox(label='Developer Debug Mode', value=True, container=False, visible=False)
 
@@ -490,16 +493,16 @@ with shared.gradio_root:
                                                       interactive=not modules.config.default_black_out_nsfw,
                                                       info='Disable preview during generation.')
                         disable_intermediate_results = gr.Checkbox(label='Disable Intermediate Results', 
-                                                                   value=modules.config.default_performance == 'Extreme Speed',
-                                                                   interactive=modules.config.default_performance != 'Extreme Speed',
-                                                                   info='Disable intermediate results during generation, only show final gallery.')
+                                                      value=modules.config.default_performance == 'Extreme Speed',
+                                                      interactive=modules.config.default_performance != 'Extreme Speed',
+                                                      info='Disable intermediate results during generation, only show final gallery.')
 
                         black_out_nsfw = gr.Checkbox(label='Black Out NSFW', value=modules.config.default_black_out_nsfw,
                                                      interactive=not modules.config.default_black_out_nsfw,
                                                      info='Use black image if NSFW is detected.')
 
                         black_out_nsfw.change(lambda x: gr.update(value=x, interactive=not x),
-                                              inputs=black_out_nsfw, outputs=disable_preview, queue=False, show_progress=False)
+                                     inputs=black_out_nsfw, outputs=disable_preview, queue=False, show_progress=False)
 
                         if not args_manager.args.disable_metadata:
                             save_metadata_to_images = gr.Checkbox(label='Save Metadata to Images', value=modules.config.default_save_metadata_to_images,
@@ -564,7 +567,7 @@ with shared.gradio_root:
                         inpaint_mask_upload_checkbox.change(lambda x: [gr.update(visible=x)] * 2,
                                                             inputs=inpaint_mask_upload_checkbox,
                                                             outputs=[inpaint_mask_image, inpaint_mask_generation_col],
-                                                            queue=False, show_progress(False)
+                                                            queue=False, show_progress=False)
 
                     with gr.Tab(label='FreeU'):
                         freeu_enabled = gr.Checkbox(label='Enabled', value=False)
@@ -679,11 +682,11 @@ with shared.gradio_root:
                 if is_generating:
                     return gr.update(), gr.update(), gr.update()
                 else:
-                    return gr.update(), gr.update(visible=True), gr.update(visible(False)
+                    return gr.update(), gr.update(visible=True), gr.update(visible=False)
 
-            return json.dumps(loaded_json), gr.update(visible=False), gr.update(visible(True)
+            return json.dumps(loaded_json), gr.update(visible=False), gr.update(visible=True)
 
-        prompt.input(parse_meta, inputs=[prompt, state_is_generating], outputs=[prompt, generate_button, load_parameter_button], queue=False, show_progress(False)
+        prompt.input(parse_meta, inputs=[prompt, state_is_generating], outputs=[prompt, generate_button, load_parameter_button], queue=False, show_progress=False)
 
         load_parameter_button.click(modules.meta_parser.load_parameter_button_click, inputs=[prompt, state_is_generating], outputs=load_data_outputs, queue=False, show_progress=False)
 
@@ -699,14 +702,14 @@ with shared.gradio_root:
             return modules.meta_parser.load_parameter_button_click(parsed_parameters, state_is_generating)
 
         metadata_import_button.click(trigger_metadata_import, inputs=[metadata_input_image, state_is_generating], outputs=load_data_outputs, queue=False, show_progress=True) \
-            .then(style_sorter.sort_styles, inputs=style_selections, outputs=style_selections, queue(False)
+            .then(style_sorter.sort_styles, inputs=style_selections, outputs=style_selections, queue=False, show_progress=False)
 
-        generate_button.click(lambda: (gr.update(visible=True, interactive(True), gr.update(visible(True), interactive(True), gr.update(visible=False), interactive=False), [], True),
+        generate_button.click(lambda: (gr.update(visible=True, interactive=True), gr.update(visible=True, interactive=True), gr.update(visible=False, interactive=False), [], True),
                               outputs=[stop_button, skip_button, generate_button, gallery, state_is_generating]) \
             .then(fn=refresh_seed, inputs=[seed_random, image_seed], outputs=image_seed) \
             .then(fn=get_task, inputs=ctrls, outputs=currentTask) \
             .then(fn=generate_clicked, inputs=currentTask, outputs=[progress_html, progress_window, progress_gallery, gallery]) \
-            .then(lambda: (gr.update(visible=True, interactive(True), gr.update(visible=False, interactive=False), gr.update(visible=False, interactive=False), False),
+            .then(lambda: (gr.update(visible=True, interactive=True), gr.update(visible=False, interactive=False), gr.update(visible=False, interactive=False), False),
                   outputs=[generate_button, stop_button, skip_button, state_is_generating]) \
             .then(fn=update_history_link, outputs=history_link) \
             .then(fn=lambda: None, _js='playNotification').then(fn=lambda: None, _js='refresh_grid_delayed')
@@ -714,6 +717,7 @@ with shared.gradio_root:
 def dump_default_english_config():
     from modules.localization import dump_english_config
     dump_english_config(grh.all_components)
+
 
 shared.gradio_root.launch(
     inbrowser=args_manager.args.in_browser,
