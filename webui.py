@@ -328,14 +328,31 @@ with shared.gradio_root:
                                         outputs=image_input_panel, queue=False, show_progress=False, _js=switch_js)
             ip_advanced.change(lambda: None, queue=False, show_progress=False, _js=down_js)
 
-            current_tab = gr.Textbox(value='uov', visible=False)
-            uov_tab.select(lambda: 'uov', outputs=current_tab, queue=False, _js=down_js, show_progress=False)
-            inpaint_tab.select(lambda: 'inpaint', outputs=current_tab, queue=False, _js=down_js, show_progress=False)
-            ip_tab.select(lambda: 'ip', outputs=current_tab, queue=False, _js=down_js, show_progress=False)
-            desc_tab.select(lambda: 'desc', outputs=current_tab, queue=False, _js=down_js, show_progress=False)
+            # Define visibility toggles for the new sections
+            uov_section = gr.Column(visible=True)
+            inpaint_section = gr.Column(visible=True)
+            describe_section = gr.Column(visible=True)
 
-        with gr.Column(scale=1, visible=modules.config.default_advanced_checkbox) as advanced_column:
-            with gr.Tab(label='Settings'):
+            # Use update methods to control visibility based on current_tab value
+            def toggle_section_visibility(tab):
+                if tab == 'uov':
+                    return gr.update(visible=True), gr.update(visible=False), gr.update(visible=False)
+                elif tab == 'inpaint':
+                    return gr.update(visible=False), gr.update(visible=True), gr.update(visible=False)
+                elif tab == 'desc':
+                    return gr.update(visible=False), gr.update(visible=False), gr.update(visible=True)
+                else:
+                    return gr.update(visible=False), gr.update(visible=False), gr.update(visible=False)
+
+            current_tab = gr.Textbox(value='uov', visible=False)
+
+            current_tab.change(toggle_section_visibility, inputs=current_tab, 
+                            outputs=[uov_section, inpaint_section, describe_section], queue=False)
+
+            with gr.Column(scale=1, visible=modules.config.default_advanced_checkbox) as advanced_column:
+                with gr.Tab(label='Settings'):
+                    # Rest of your settings code here
+
                 performance_selection = gr.Radio(label='Performance',
                                                  choices=modules.flags.performance_selections,
                                                  value=modules.config.default_performance,
