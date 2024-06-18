@@ -428,37 +428,42 @@ with shared.gradio_root:
                                                        show_progress=False).then(
                     lambda: None, _js='()=>{refresh_style_localization();}')
 
-            with gr.Tab(label='Models'):
-                with gr.Column(visible=False):
-                    with gr.Group():
+            # Remove the "Models" tab definition
+            # with gr.Tab(label='Models'):
+            #     ...
+
+            # Move the content of the "Models" tab outside the tab structure
+            with gr.Column(visible=False):
+                with gr.Group():
+                    with gr.Row():
+                        base_model = gr.Dropdown(label='Base Model (SDXL only)', choices=modules.config.model_filenames, value=modules.config.default_base_model_name, show_label=True)
+                        refiner_model = gr.Dropdown(label='Refiner (SDXL or SD 1.5)', choices=['None'] + modules.config.model_filenames, value=modules.config.default_refiner_model_name, show_label=True)
+
+                    refiner_switch = gr.Slider(label='Refiner Switch At', minimum=0.1, maximum=1.0, step=0.0001,
+                                            info='Use 0.4 for SD1.5 realistic models; '
+                                                    'or 0.667 for SD1.5 anime models; '
+                                                    'or 0.8 for XL-refiners; '
+                                                    'or any value for switching two SDXL models.',
+                                            value=modules.config.default_refiner_switch,
+                                            visible=modules.config.default_refiner_model_name != 'None')
+
+                    refiner_model.change(lambda x: gr.update(visible=x != 'None'),
+                                        inputs=refiner_model, outputs=refiner_switch, show_progress=False, queue=False)
+
+                with gr.Group():
+                    lora_ctrls = []
+
+                    for i, (n, v) in enumerate(modules.config.default_loras):
                         with gr.Row():
-                            base_model = gr.Dropdown(label='Base Model (SDXL only)', choices=modules.config.model_filenames, value=modules.config.default_base_model_name, show_label=True)
-                            refiner_model = gr.Dropdown(label='Refiner (SDXL or SD 1.5)', choices=['None'] + modules.config.model_filenames, value=modules.config.default_refiner_model_name, show_label=True)
-
-                        refiner_switch = gr.Slider(label='Refiner Switch At', minimum=0.1, maximum=1.0, step=0.0001,
-                                                info='Use 0.4 for SD1.5 realistic models; '
-                                                        'or 0.667 for SD1.5 anime models; '
-                                                        'or 0.8 for XL-refiners; '
-                                                        'or any value for switching two SDXL models.',
-                                                value=modules.config.default_refiner_switch,
-                                                visible=modules.config.default_refiner_model_name != 'None')
-
-                        refiner_model.change(lambda x: gr.update(visible=x != 'None'),
-                                            inputs=refiner_model, outputs=refiner_switch, show_progress=False, queue=False)
-
-                    with gr.Group():
-                        lora_ctrls = []
-
-                        for i, (n, v) in enumerate(modules.config.default_loras):
-                            with gr.Row():
-                                lora_model = gr.Dropdown(label=f'LoRA {i + 1}',
-                                                        choices=['None'] + modules.config.lora_filenames, value=n)
-                                lora_weight = gr.Slider(label='Weight', minimum=-2, maximum=2, step=0.01, value=v,
-                                                        elem_classes='lora_weight')
-                                lora_ctrls += [lora_model, lora_weight]
+                            lora_model = gr.Dropdown(label=f'LoRA {i + 1}',
+                                                    choices=['None'] + modules.config.lora_filenames, value=n)
+                            lora_weight = gr.Slider(label='Weight', minimum=-2, maximum=2, step=0.01, value=v,
+                                                    elem_classes='lora_weight')
+                            lora_ctrls += [lora_model, lora_weight]
 
                 with gr.Row():
                     model_refresh = gr.Button(label='Refresh', value='\U0001f504 Refresh All Files', variant='secondary', elem_classes='refresh_button')
+
             with gr.Tab(label='Advanced'):
                 guidance_scale = gr.Slider(label='Guidance Scale', minimum=1.0, maximum=30.0, step=0.01,
                                            value=modules.config.default_cfg_scale,
@@ -638,24 +643,28 @@ with shared.gradio_root:
                 model_refresh.click(model_refresh_clicked, [],  model_refresh_output + lora_ctrls,
                                     queue=False, show_progress=False)
 
-            with gr.Tab(label='Audio'):
-                with gr.Column(visible=False):
-                    play_notification = gr.Checkbox(label='Play notification after rendering', value=False)
-                    notification_file = 'notification.mp3'
-                    if os.path.exists(notification_file):
-                        notification = gr.State(value=notification_file)
-                        notification_input = gr.Audio(label='Notification', interactive=True, elem_id='audio_notification', visible=False, show_edit_button=False)
+            # Remove the "Audio" tab definition
+            # with gr.Tab(label='Audio'):
+            #     ...
 
-                        def play_notification_checked(r, notification):
-                            return gr.update(visible=r, value=notification if r else None)
+            # Move the content of the "Audio" tab outside the tab structure
+            with gr.Column(visible=False):
+                play_notification = gr.Checkbox(label='Play notification after rendering', value=False)
+                notification_file = 'notification.mp3'
+                if os.path.exists(notification_file):
+                    notification = gr.State(value=notification_file)
+                    notification_input = gr.Audio(label='Notification', interactive=True, elem_id='audio_notification', visible=False, show_edit_button=False)
 
-                        def notification_input_changed(notification_input, notification):
-                            if notification_input:
-                                notification = notification_input
-                            return notification
+                    def play_notification_checked(r, notification):
+                        return gr.update(visible=r, value=notification if r else None)
 
-                        play_notification.change(fn=play_notification_checked, inputs=[play_notification, notification], outputs=[notification_input], queue=False)
-                        notification_input.change(fn=notification_input_changed, inputs=[notification_input, notification], outputs=[notification], queue=False)
+                    def notification_input_changed(notification_input, notification):
+                        if notification_input:
+                            notification = notification_input
+                        return notification
+
+                    play_notification.change(fn=play_notification_checked, inputs=[play_notification, notification], outputs=[notification_input], queue=False)
+                    notification_input.change(fn=notification_input_changed, inputs=[notification_input, notification], outputs=[notification], queue=False)
 
             state_is_generating = gr.State(False)
 
