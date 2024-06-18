@@ -745,7 +745,7 @@ with shared.gradio_root:
 
         ctrls += [base_model, refiner_model, refiner_switch] + lora_ctrls
         ctrls += [input_image_checkbox, current_tab]
-        ctrls += [uov_method, uov_input_image]
+        # ctrls += [uov_method, uov_input_image]
         ctrls += [outpaint_selections, inpaint_input_image, inpaint_additional_prompt, inpaint_mask_image]
         ctrls += [disable_preview, disable_intermediate_results, black_out_nsfw]
         ctrls += [adm_scaler_positive, adm_scaler_negative, adm_scaler_end, adaptive_cfg]
@@ -821,8 +821,8 @@ with shared.gradio_root:
                 return trigger_describe(mode, img)
             return gr.update(), gr.update()
 
-        uov_input_image.upload(trigger_uov_describe, inputs=[desc_method, uov_input_image, prompt],
-                       outputs=[prompt, style_selections], show_progress=True, queue=True)
+        # uov_input_image.upload(trigger_uov_describe, inputs=[desc_method, uov_input_image, prompt],
+        #                outputs=[prompt, style_selections], show_progress=True, queue=True)
 
 def dump_default_english_config():
     from modules.localization import dump_english_config
