@@ -180,13 +180,13 @@ with shared.gradio_root:
                
             with gr.Row(visible=False) as image_input_panel:
                 with gr.Tabs():
-                    with gr.TabItem(label='Upscale or Variation') as uov_tab:
-                        with gr.Row():
-                            with gr.Column():
-                                uov_input_image = grh.Image(label='Drag above image to here', source='upload', type='numpy')
-                            with gr.Column():
-                                uov_method = gr.Radio(label='Upscale or Variation:', choices=flags.uov_list, value=flags.disabled)
-                                gr.HTML('<a href="https://github.com/lllyasviel/Fooocus/discussions/390" target="_blank">\U0001F4D4 Document</a>')
+                    # with gr.TabItem(label='Upscale or Variation') as uov_tab:
+                    #     with gr.Row():
+                    #         with gr.Column():
+                    #             uov_input_image = grh.Image(label='Drag above image to here', source='upload', type='numpy')
+                    #         with gr.Column():
+                    #             uov_method = gr.Radio(label='Upscale or Variation:', choices=flags.uov_list, value=flags.disabled)
+                    #             gr.HTML('<a href="https://github.com/lllyasviel/Fooocus/discussions/390" target="_blank">\U0001F4D4 Document</a>')
                     with gr.TabItem(label='Image Prompt') as ip_tab:
                         with gr.Row():
                             ip_images = []
@@ -335,7 +335,7 @@ with shared.gradio_root:
             ip_advanced.change(lambda: None, queue=False, show_progress=False, _js=down_js)
 
             current_tab = gr.Textbox(value='uov', visible=False)
-            uov_tab.select(lambda: 'uov', outputs=current_tab, queue=False, _js=down_js, show_progress=False)
+            # uov_tab.select(lambda: 'uov', outputs=current_tab, queue=False, _js=down_js, show_progress=False)
             inpaint_tab.select(lambda: 'inpaint', outputs=current_tab, queue=False, _js=down_js, show_progress=False)
             ip_tab.select(lambda: 'ip', outputs=current_tab, queue=False, _js=down_js, show_progress=False)
             desc_tab.select(lambda: 'desc', outputs=current_tab, queue=False, _js=down_js, show_progress=False)
