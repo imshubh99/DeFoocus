@@ -14,7 +14,6 @@ import modules.gradio_hijack as grh
 import modules.style_sorter as style_sorter
 import modules.meta_parser
 from modules.rembg import rembg_run
-from modules.load_online import load_demos_names, load_tools_names, load_demos_url, load_tools_url
 import args_manager
 import copy
 import launch
@@ -125,9 +124,7 @@ with shared.gradio_root:
                                         elem_id='progress-bar', elem_classes='progress-bar')
                 gallery = gr.Gallery(label='Gallery', show_label=False, object_fit='contain', visible=True, height=768,
                                      elem_classes=['resizable_area', 'main_view', 'final_gallery', 'image_gallery'],
-                                     elem_id='final_gallery',
-                                     value=["assets/favicon.png"],
-                                     preview=True)
+                                     elem_id='final_gallery')
             with gr.Tab("Photopea"):
                 with gr.Row():
                     photopea = gr.HTML(
@@ -138,26 +135,14 @@ with shared.gradio_root:
                         onload = "{PHOTOPEA_IFRAME_LOADED_EVENT}(this)">"""
                     )
                 gr.Markdown("Powered by [🦜 Photopea API](https://www.photopea.com/api)")
-            with gr.Tab("rembg"):
+            with gr.Tab("rembg", visible=False):
                 with gr.Column(scale=1):
                     rembg_input = grh.Image(label='Drag above image to here', source='upload', type='filepath', scale=20)
                     rembg_button = gr.Button(value="Remove Background", interactive=True, scale=1)
                 with gr.Column(scale=3):
                     rembg_output = grh.Image(label='rembg Output', interactive=False, height=380)
                 gr.Markdown("Powered by [🪄 rembg 2.0.53](https://github.com/danielgatis/rembg/releases/tag/v2.0.53)")
-            rembg_button.click(rembg_run, inputs=rembg_input, outputs=rembg_output, show_progress="full") 
-            with gr.Tab("Online"):
-                with gr.Tab("Demos"):
-                    for name in load_demos_names():
-                        url = load_demos_url(name)
-                        with gr.Tab(name):
-                            gr.HTML(f"<iframe src='{url}' width='100%' height='1080px' style='border-radius: 8px;'></iframe>")
-                with gr.Tab("Tools"):
-                    for name in load_tools_names():
-                        url = load_tools_url(name)
-                        with gr.Tab(name):
-                            gr.HTML(f"<iframe src='{url}' width='100%' height='1080px' style='border-radius: 8px;'></iframe>")
-
+            rembg_button.click(rembg_run, inputs=rembg_input, outputs=rembg_output, show_progress="full")  
             with gr.Row(elem_classes='type_row'):
                 with gr.Column(scale=17):
                     prompt = gr.Textbox(show_label=False, placeholder="Type prompt here or paste parameters.", elem_id='positive_prompt',
@@ -196,6 +181,13 @@ with shared.gradio_root:
                
             with gr.Row(visible=False) as image_input_panel:
                 with gr.Tabs():
+                    # with gr.TabItem(label='Upscale or Variation') as uov_tab:
+                    #     with gr.Row():
+                    #         with gr.Column():
+                    #             uov_input_image = grh.Image(label='Drag above image to here', source='upload', type='numpy')
+                    #         with gr.Column():
+                    #             uov_method = gr.Radio(label='Upscale or Variation:', choices=flags.uov_list, value=flags.disabled)
+                    #             gr.HTML('<a href="https://github.com/lllyasviel/Fooocus/discussions/390" target="_blank">\U0001F4D4 Document</a>')
                     with gr.TabItem(label='Image Prompt') as ip_tab:
                         with gr.Row():
                             ip_images = []
@@ -211,11 +203,13 @@ with shared.gradio_root:
                                     ip_ctrls.append(ip_image)
                                     with gr.Column(visible=False) as ad_col:
                                         with gr.Row():
-                                            ip_stop = gr.Slider(label='Stop At', minimum=0.0, maximum=1.0, step=0.001, value=0.85, visible=False)
+                                            # default_end, default_weight = flags.default_parameters[flags.default_ip]
+
+                                            ip_stop = gr.Slider(label='Stop At', minimum=0.0, maximum=1.0, step=0.001, value=default_end)
                                             ip_stops.append(ip_stop)
                                             ip_ctrls.append(ip_stop)
 
-                                            ip_weight = gr.Slider(label='Weight', minimum=0.0, maximum=2.0, step=0.001, value=0.97, visible=False)
+                                            ip_weight = gr.Slider(label='Weight', minimum=0.0, maximum=2.0, step=0.001, value=default_weight)
                                             ip_weights.append(ip_weight)
                                             ip_ctrls.append(ip_weight)
 
@@ -235,8 +229,8 @@ with shared.gradio_root:
                                 [0.97] * len(ip_weights)
 
                         ip_advanced.change(ip_advance_checked, inputs=ip_advanced,
-                                        outputs=ip_ad_cols + ip_types + ip_stops + ip_weights,
-                                        queue=False, show_progress=False)
+                                           outputs=ip_ad_cols + ip_types + ip_stops + ip_weights,
+                                           queue=False, show_progress=False)
 
                     with gr.TabItem(label='Inpaint or Outpaint') as inpaint_tab:
                         with gr.Row():
@@ -342,44 +336,26 @@ with shared.gradio_root:
             ip_advanced.change(lambda: None, queue=False, show_progress=False, _js=down_js)
 
             current_tab = gr.Textbox(value='uov', visible=False)
-            #uov_tab.select(lambda: 'uov', outputs=current_tab, queue=False, _js=down_js, show_progress=False)
+            # uov_tab.select(lambda: 'uov', outputs=current_tab, queue=False, _js=down_js, show_progress=False)
             inpaint_tab.select(lambda: 'inpaint', outputs=current_tab, queue=False, _js=down_js, show_progress=False)
             ip_tab.select(lambda: 'ip', outputs=current_tab, queue=False, _js=down_js, show_progress=False)
             desc_tab.select(lambda: 'desc', outputs=current_tab, queue=False, _js=down_js, show_progress=False)
 
         with gr.Column(scale=1, visible=modules.config.default_advanced_checkbox) as advanced_column:
             with gr.Tab(label='Settings'):
-                with gr.Row():
-                    performance_selection = gr.Radio(label='Performance',
-                                                    choices=modules.flags.performance_selections,
-                                                    value=modules.config.default_performance,
-                                                    elem_classes='performance_selections')
-                    if not args_manager.args.disable_preset_selection:
-                        preset_selection = gr.Dropdown(label='Preset',
-                                                    choices=modules.config.available_presets,
-                                                    value=args_manager.args.preset if args_manager.args.preset else "initial",
-                                                    interactive=True)
-                    
+                performance_selection = gr.Radio(label='Performance',
+                                                 choices=modules.flags.performance_selections,
+                                                 value=modules.config.default_performance,
+                                                 elem_classes='performance_selections')
+                if not args_manager.args.disable_preset_selection:
+                    preset_selection = gr.Radio(label='Preset',
+                                                choices=modules.config.available_presets,
+                                                value=args_manager.args.preset if args_manager.args.preset else "initial",
+                                                interactive=True)
+                
                 aspect_ratios_selection = gr.Radio(label='Aspect Ratios', choices=modules.config.available_aspect_ratios,
                                                    value=modules.config.default_aspect_ratio, info='width × height',
                                                    elem_classes='aspect_ratios')
-               
-                with gr.Column():
-                    sampling_apply = gr.Checkbox(label="Sampling", value=False)
-                    with gr.Row(visible=False) as sampling:
-                        sampler_name = gr.Dropdown(label='Sampler', choices=flags.sampler_list,
-                                                    value=modules.config.default_sampler)
-                        scheduler_name = gr.Dropdown(label='Scheduler', choices=flags.scheduler_list,
-                                                    value=modules.config.default_scheduler)
-                sampling_apply.change(
-                    fn=lambda x: gr.update(visible=x),
-                    inputs=sampling_apply,
-                    outputs=sampling,
-                    queue=False,
-                    api_name=False,
-                )
-                                            
-                
                 image_number = gr.Slider(label='Image Number', minimum=1, maximum=modules.config.default_max_image_number, step=1, value=modules.config.default_image_number)
 
                 
@@ -495,27 +471,9 @@ with shared.gradio_root:
                                             choices=modules.flags.output_formats,
                                             value=modules.config.default_output_format)
 
-                play_notification = gr.Checkbox(label='Play notification after rendering', value=False)
-                notification_file = 'notification.mp3'
-                if os.path.exists(notification_file):
-                    notification = gr.State(value=notification_file)
-                    notification_input = gr.Audio(label='Notification', interactive=True, elem_id='audio_notification', visible=False, show_edit_button=False)
+                dev_mode = gr.Checkbox(label='Developer Debug Mode', value=False, container=False)
 
-                    def play_notification_checked(r, notification):
-                        return gr.update(visible=r, value=notification if r else None)
-
-                    def notification_input_changed(notification_input, notification):
-                        if notification_input:
-                            notification = notification_input
-                        return notification
-
-                    play_notification.change(fn=play_notification_checked, inputs=[play_notification, notification], outputs=[notification_input], queue=False)
-                    notification_input.change(fn=notification_input_changed, inputs=[notification_input, notification], outputs=[notification], queue=False)
-
-
-                dev_mode = gr.Checkbox(label='Advanced mode', value=True, container=False)
-
-                with gr.Column(visible=True) as dev_tools:
+                with gr.Column(visible=False) as dev_tools:
                     with gr.Tab(label='Debug Tools'):
                         adm_scaler_positive = gr.Slider(label='Positive ADM Guidance Scaler', minimum=0.1, maximum=3.0,
                                                         step=0.001, value=1.5, info='The scaler multiplied to positive ADM (use 1.0 to disable). ')
@@ -532,12 +490,11 @@ with shared.gradio_root:
                                                  value=modules.config.default_cfg_tsnr,
                                                  info='Enabling Fooocus\'s implementation of CFG mimicking for TSNR '
                                                       '(effective when real CFG > mimicked CFG).')
-                        '''
                         sampler_name = gr.Dropdown(label='Sampler', choices=flags.sampler_list,
                                                    value=modules.config.default_sampler)
                         scheduler_name = gr.Dropdown(label='Scheduler', choices=flags.scheduler_list,
                                                      value=modules.config.default_scheduler)
-                        '''
+
                         generate_image_grid = gr.Checkbox(label='Generate Image Grid for Each Batch',
                                                           info='(Experimental) This may cause performance problems on some computers and certain internet conditions.',
                                                           value=False)
@@ -681,7 +638,24 @@ with shared.gradio_root:
                 model_refresh.click(model_refresh_clicked, [],  model_refresh_output + lora_ctrls,
                                     queue=False, show_progress=False)
 
-                
+            with gr.Tab(label='Audio'):
+                play_notification = gr.Checkbox(label='Play notification after rendering', value=False)
+                notification_file = 'notification.mp3'
+                if os.path.exists(notification_file):
+                    notification = gr.State(value=notification_file)
+                    notification_input = gr.Audio(label='Notification', interactive=True, elem_id='audio_notification', visible=False, show_edit_button=False)
+
+                    def play_notification_checked(r, notification):
+                        return gr.update(visible=r, value=notification if r else None)
+
+                    def notification_input_changed(notification_input, notification):
+                        if notification_input:
+                            notification = notification_input
+                        return notification
+
+                    play_notification.change(fn=play_notification_checked, inputs=[play_notification, notification], outputs=[notification_input], queue=False)
+                    notification_input.change(fn=notification_input_changed, inputs=[notification_input, notification], outputs=[notification], queue=False)
+
         state_is_generating = gr.State(False)
 
         load_data_outputs = [advanced_checkbox, image_number, prompt, negative_prompt, style_selections,
