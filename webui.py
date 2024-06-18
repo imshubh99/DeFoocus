@@ -205,11 +205,11 @@ with shared.gradio_root:
                                         with gr.Row():
                                             # default_end, default_weight = flags.default_parameters[flags.default_ip]
 
-                                            ip_stop = gr.Slider(label='Stop At', minimum=0.0, maximum=1.0, step=0.001, value=default_end)
+                                            ip_stop = gr.Slider(label='Stop At', minimum=0.0, maximum=1.0, step=0.001, value=0.85, visible=False)
                                             ip_stops.append(ip_stop)
                                             ip_ctrls.append(ip_stop)
 
-                                            ip_weight = gr.Slider(label='Weight', minimum=0.0, maximum=2.0, step=0.001, value=default_weight)
+                                            ip_weight = gr.Slider(label='Weight', minimum=0.0, maximum=2.0, step=0.001, value=0.97, visible=False)
                                             ip_weights.append(ip_weight)
                                             ip_ctrls.append(ip_weight)
 
