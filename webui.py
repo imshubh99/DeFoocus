@@ -181,7 +181,7 @@ with shared.gradio_root:
                
             with gr.Row(visible=False) as image_input_panel:
                 with gr.Tabs():
-                    with gr.TabItem(label='Upscale or Variation', visible=False) as uov_tab:
+                    with gr.TabItem(label='Upscale or Variation') as uov_tab:
                         with gr.Row():
                             with gr.Column():
                                 uov_input_image = grh.Image(label='Drag above image to here', source='upload', type='numpy')
