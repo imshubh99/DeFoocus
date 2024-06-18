@@ -13,7 +13,7 @@ import modules.flags as flags
 import modules.gradio_hijack as grh
 import modules.style_sorter as style_sorter
 import modules.meta_parser
-from modules.rembg import rembg_run
+# from modules.rembg import rembg_run
 import args_manager
 import copy
 import launch
@@ -24,15 +24,15 @@ from modules.ui_gradio_extensions import reload_javascript
 from modules.auth import auth_enabled, check_auth
 from modules.util import is_json
 
-PHOTOPEA_MAIN_URL = "https://www.photopea.com/"
-PHOTOPEA_IFRAME_ID = "webui-photopea-iframe"
-PHOTOPEA_IFRAME_HEIGHT = 684
-PHOTOPEA_IFRAME_WIDTH = "100%"
-PHOTOPEA_IFRAME_LOADED_EVENT = "onPhotopeaLoaded"
+# PHOTOPEA_MAIN_URL = "https://www.photopea.com/"
+# PHOTOPEA_IFRAME_ID = "webui-photopea-iframe"
+# PHOTOPEA_IFRAME_HEIGHT = 684
+# PHOTOPEA_IFRAME_WIDTH = "100%"
+# PHOTOPEA_IFRAME_LOADED_EVENT = "onPhotopeaLoaded"
 
 
-def get_photopea_url_params():
-    return "#%7B%22resources%22:%5B%22data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAgAAAAIAAQMAAADOtka5AAAAAXNSR0IB2cksfwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAANQTFRF////p8QbyAAAADZJREFUeJztwQEBAAAAgiD/r25IQAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAfBuCAAAB0niJ8AAAAABJRU5ErkJggg==%22%5D%7D"
+# def get_photopea_url_params():
+#     return "#%7B%22resources%22:%5B%22data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAgAAAAIAAQMAAADOtka5AAAAAXNSR0IB2cksfwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAANQTFRF////p8QbyAAAADZJREFUeJztwQEBAAAAgiD/r25IQAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAfBuCAAAB0niJ8AAAAABJRU5ErkJggg==%22%5D%7D"
 
 
 def get_task(*args):
@@ -125,24 +125,24 @@ with shared.gradio_root:
                 gallery = gr.Gallery(label='Gallery', show_label=False, object_fit='contain', visible=True, height=768,
                                      elem_classes=['resizable_area', 'main_view', 'final_gallery', 'image_gallery'],
                                      elem_id='final_gallery')
-            with gr.Tab("Photopea"):
-                with gr.Row():
-                    photopea = gr.HTML(
-                        f"""<iframe id="{PHOTOPEA_IFRAME_ID}" 
-                        src = "{PHOTOPEA_MAIN_URL}{get_photopea_url_params()}" 
-                        width = "{PHOTOPEA_IFRAME_WIDTH}" 
-                        height = "{PHOTOPEA_IFRAME_HEIGHT}"
-                        onload = "{PHOTOPEA_IFRAME_LOADED_EVENT}(this)">"""
-                    )
-                gr.Markdown("Powered by [🦜 Photopea API](https://www.photopea.com/api)")
-            with gr.Tab("rembg", visible=False):
-                with gr.Column(scale=1):
-                    rembg_input = grh.Image(label='Drag above image to here', source='upload', type='filepath', scale=20)
-                    rembg_button = gr.Button(value="Remove Background", interactive=True, scale=1)
-                with gr.Column(scale=3):
-                    rembg_output = grh.Image(label='rembg Output', interactive=False, height=380)
-                gr.Markdown("Powered by [🪄 rembg 2.0.53](https://github.com/danielgatis/rembg/releases/tag/v2.0.53)")
-            rembg_button.click(rembg_run, inputs=rembg_input, outputs=rembg_output, show_progress="full")  
+            # with gr.Tab("Photopea"):
+            #     with gr.Row():
+            #         photopea = gr.HTML(
+            #             f"""<iframe id="{PHOTOPEA_IFRAME_ID}" 
+            #             src = "{PHOTOPEA_MAIN_URL}{get_photopea_url_params()}" 
+            #             width = "{PHOTOPEA_IFRAME_WIDTH}" 
+            #             height = "{PHOTOPEA_IFRAME_HEIGHT}"
+            #             onload = "{PHOTOPEA_IFRAME_LOADED_EVENT}(this)">"""
+            #         )
+                # gr.Markdown("Powered by [🦜 Photopea API](https://www.photopea.com/api)")
+            # with gr.Tab("rembg", visible=False):
+            #     with gr.Column(scale=1):
+            #         rembg_input = grh.Image(label='Drag above image to here', source='upload', type='filepath', scale=20)
+            #         rembg_button = gr.Button(value="Remove Background", interactive=True, scale=1)
+            #     with gr.Column(scale=3):
+            #         rembg_output = grh.Image(label='rembg Output', interactive=False, height=380)
+            #     gr.Markdown("Powered by [🪄 rembg 2.0.53](https://github.com/danielgatis/rembg/releases/tag/v2.0.53)")
+            # rembg_button.click(rembg_run, inputs=rembg_input, outputs=rembg_output, show_progress="full")  
             with gr.Row(elem_classes='type_row'):
                 with gr.Column(scale=17):
                     prompt = gr.Textbox(show_label=False, placeholder="Type prompt here or paste parameters.", elem_id='positive_prompt',
