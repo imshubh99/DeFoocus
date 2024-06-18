@@ -476,7 +476,7 @@ with shared.gradio_root:
                                             choices=modules.flags.output_formats,
                                             value=modules.config.default_output_format)
 
-                dev_mode = gr.Checkbox(label='Developer Debug Mode', value=False, container=False)
+                dev_mode = gr.Checkbox(label='Developer Debug Mode', value=True, container=False)
 
                 with gr.Column(visible=False) as dev_tools:
                     with gr.Tab(label='Debug Tools'):
@@ -562,7 +562,7 @@ with shared.gradio_root:
                         mixing_image_prompt_and_vary_upscale = gr.Checkbox(label='Mixing Image Prompt and Vary/Upscale',
                                                                            value=False)
                         mixing_image_prompt_and_inpaint = gr.Checkbox(label='Mixing Image Prompt and Inpaint',
-                                                                      value=False)
+                                                                      value=True)
 
                         controlnet_softness = gr.Slider(label='Softness of ControlNet', minimum=0.0, maximum=1.0,
                                                         step=0.001, value=0.25,
@@ -618,12 +618,12 @@ with shared.gradio_root:
                         freeu_s2 = gr.Slider(label='S2', minimum=0, maximum=4, step=0.01, value=0.95)
                         freeu_ctrls = [freeu_enabled, freeu_b1, freeu_b2, freeu_s1, freeu_s2]
 
-                def dev_mode_checked(r):
-                    return gr.update(visible=r)
+                # def dev_mode_checked(r):
+                #     return gr.update(visible=r)
 
 
-                dev_mode.change(dev_mode_checked, inputs=[dev_mode], outputs=[dev_tools],
-                                queue=False, show_progress=False)
+                # dev_mode.change(dev_mode_checked, inputs=[dev_mode], outputs=[dev_tools],
+                #                 queue=False, show_progress=False)
 
                 def model_refresh_clicked():
                     modules.config.update_all_model_names()
