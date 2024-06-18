@@ -96,7 +96,7 @@ try_load_deprecated_user_path_config()
 
 def list_presets():
     preset_folder = 'presets'
-    presets = ['initial']
+    presets = ['realistic']
     if not os.path.exists(preset_folder):
         print('No presets found.')
         return presets
@@ -326,7 +326,7 @@ default_performance = get_config_item_or_set_default(
 )
 default_advanced_checkbox = get_config_item_or_set_default(
     key='default_advanced_checkbox',
-    default_value=True,
+    default_value=False,
     validator=lambda x: isinstance(x, bool)
 )
 default_max_image_number = get_config_item_or_set_default(

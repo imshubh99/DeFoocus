@@ -175,7 +175,7 @@ with shared.gradio_root:
                     stop_button.click(stop_clicked, inputs=currentTask, outputs=currentTask, queue=False, show_progress=False, _js='cancelGenerateForever')
                     skip_button.click(skip_clicked, inputs=currentTask, outputs=currentTask, queue=False, show_progress=False)
             with gr.Row(elem_classes='advanced_check_row'):
-                input_image_checkbox = gr.Checkbox(label='Input Image', value=True, container=False, elem_classes='min_check')
+                input_image_checkbox = gr.Checkbox(label='Input Image', value=False, container=False, elem_classes='min_check')
                 advanced_checkbox = gr.Checkbox(label='Advanced', value=modules.config.default_advanced_checkbox, container=False, elem_classes='min_check')
                
             with gr.Row(visible=False) as image_input_panel:
@@ -349,7 +349,7 @@ with shared.gradio_root:
                 if not args_manager.args.disable_preset_selection:
                     preset_selection = gr.Radio(label='Preset',
                                                 choices=modules.config.available_presets,
-                                                value=args_manager.args.preset if args_manager.args.preset else "initial",
+                                                value=args_manager.args.preset if args_manager.args.preset else "realistic",
                                                 interactive=True)
                 
                 aspect_ratios_selection = gr.Radio(label='Aspect Ratios', choices=modules.config.available_aspect_ratios,
@@ -429,32 +429,33 @@ with shared.gradio_root:
                     lambda: None, _js='()=>{refresh_style_localization();}')
 
             with gr.Tab(label='Models'):
-                with gr.Group():
-                    with gr.Row():
-                        base_model = gr.Dropdown(label='Base Model (SDXL only)', choices=modules.config.model_filenames, value=modules.config.default_base_model_name, show_label=True)
-                        refiner_model = gr.Dropdown(label='Refiner (SDXL or SD 1.5)', choices=['None'] + modules.config.model_filenames, value=modules.config.default_refiner_model_name, show_label=True)
-
-                    refiner_switch = gr.Slider(label='Refiner Switch At', minimum=0.1, maximum=1.0, step=0.0001,
-                                               info='Use 0.4 for SD1.5 realistic models; '
-                                                    'or 0.667 for SD1.5 anime models; '
-                                                    'or 0.8 for XL-refiners; '
-                                                    'or any value for switching two SDXL models.',
-                                               value=modules.config.default_refiner_switch,
-                                               visible=modules.config.default_refiner_model_name != 'None')
-
-                    refiner_model.change(lambda x: gr.update(visible=x != 'None'),
-                                         inputs=refiner_model, outputs=refiner_switch, show_progress=False, queue=False)
-
-                with gr.Group():
-                    lora_ctrls = []
-
-                    for i, (n, v) in enumerate(modules.config.default_loras):
+                with gr.Column(visible=False):
+                    with gr.Group():
                         with gr.Row():
-                            lora_model = gr.Dropdown(label=f'LoRA {i + 1}',
-                                                     choices=['None'] + modules.config.lora_filenames, value=n)
-                            lora_weight = gr.Slider(label='Weight', minimum=-2, maximum=2, step=0.01, value=v,
-                                                    elem_classes='lora_weight')
-                            lora_ctrls += [lora_model, lora_weight]
+                            base_model = gr.Dropdown(label='Base Model (SDXL only)', choices=modules.config.model_filenames, value=modules.config.default_base_model_name, show_label=True)
+                            refiner_model = gr.Dropdown(label='Refiner (SDXL or SD 1.5)', choices=['None'] + modules.config.model_filenames, value=modules.config.default_refiner_model_name, show_label=True)
+
+                        refiner_switch = gr.Slider(label='Refiner Switch At', minimum=0.1, maximum=1.0, step=0.0001,
+                                                info='Use 0.4 for SD1.5 realistic models; '
+                                                        'or 0.667 for SD1.5 anime models; '
+                                                        'or 0.8 for XL-refiners; '
+                                                        'or any value for switching two SDXL models.',
+                                                value=modules.config.default_refiner_switch,
+                                                visible=modules.config.default_refiner_model_name != 'None')
+
+                        refiner_model.change(lambda x: gr.update(visible=x != 'None'),
+                                            inputs=refiner_model, outputs=refiner_switch, show_progress=False, queue=False)
+
+                    with gr.Group():
+                        lora_ctrls = []
+
+                        for i, (n, v) in enumerate(modules.config.default_loras):
+                            with gr.Row():
+                                lora_model = gr.Dropdown(label=f'LoRA {i + 1}',
+                                                        choices=['None'] + modules.config.lora_filenames, value=n)
+                                lora_weight = gr.Slider(label='Weight', minimum=-2, maximum=2, step=0.01, value=v,
+                                                        elem_classes='lora_weight')
+                                lora_ctrls += [lora_model, lora_weight]
 
                 with gr.Row():
                     model_refresh = gr.Button(label='Refresh', value='\U0001f504 Refresh All Files', variant='secondary', elem_classes='refresh_button')
@@ -638,24 +639,25 @@ with shared.gradio_root:
                                     queue=False, show_progress=False)
 
             with gr.Tab(label='Audio'):
-                play_notification = gr.Checkbox(label='Play notification after rendering', value=False)
-                notification_file = 'notification.mp3'
-                if os.path.exists(notification_file):
-                    notification = gr.State(value=notification_file)
-                    notification_input = gr.Audio(label='Notification', interactive=True, elem_id='audio_notification', visible=False, show_edit_button=False)
+                with gr.Column(visible=False):
+                    play_notification = gr.Checkbox(label='Play notification after rendering', value=False)
+                    notification_file = 'notification.mp3'
+                    if os.path.exists(notification_file):
+                        notification = gr.State(value=notification_file)
+                        notification_input = gr.Audio(label='Notification', interactive=True, elem_id='audio_notification', visible=False, show_edit_button=False)
 
-                    def play_notification_checked(r, notification):
-                        return gr.update(visible=r, value=notification if r else None)
+                        def play_notification_checked(r, notification):
+                            return gr.update(visible=r, value=notification if r else None)
 
-                    def notification_input_changed(notification_input, notification):
-                        if notification_input:
-                            notification = notification_input
-                        return notification
+                        def notification_input_changed(notification_input, notification):
+                            if notification_input:
+                                notification = notification_input
+                            return notification
 
-                    play_notification.change(fn=play_notification_checked, inputs=[play_notification, notification], outputs=[notification_input], queue=False)
-                    notification_input.change(fn=notification_input_changed, inputs=[notification_input, notification], outputs=[notification], queue=False)
+                        play_notification.change(fn=play_notification_checked, inputs=[play_notification, notification], outputs=[notification_input], queue=False)
+                        notification_input.change(fn=notification_input_changed, inputs=[notification_input, notification], outputs=[notification], queue=False)
 
-        state_is_generating = gr.State(False)
+            state_is_generating = gr.State(False)
 
         load_data_outputs = [advanced_checkbox, image_number, prompt, negative_prompt, style_selections,
                              performance_selection, overwrite_step, overwrite_switch, aspect_ratios_selection,
@@ -666,7 +668,7 @@ with shared.gradio_root:
 
         if not args_manager.args.disable_preset_selection:
             def preset_selection_change(preset, is_generating):
-                preset_content = modules.config.try_get_preset_content(preset) if preset != 'initial' else {}
+                preset_content = modules.config.try_get_preset_content(preset) if preset != 'realistic' else {}
                 preset_prepared = modules.meta_parser.parse_meta_from_preset(preset_content)
 
                 default_model = preset_prepared.get('base_model')
