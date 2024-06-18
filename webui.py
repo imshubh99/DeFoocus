@@ -175,9 +175,8 @@ with shared.gradio_root:
                     stop_button.click(stop_clicked, inputs=currentTask, outputs=currentTask, queue=False, show_progress=False, _js='cancelGenerateForever')
                     skip_button.click(skip_clicked, inputs=currentTask, outputs=currentTask, queue=False, show_progress=False)
             with gr.Row(elem_classes='advanced_check_row'):
-                input_image_checkbox = gr.Checkbox(label='Input Image', value=True, visible=False, container=False, elem_classes='min_check')
-                advanced_checkbox = gr.Checkbox(label='Advanced', value=True, visible=False, container=False, elem_classes='min_check')
-
+                input_image_checkbox = gr.Checkbox(label='Input Image', value=True, container=False, elem_classes='min_check')
+                advanced_checkbox = gr.Checkbox(label='Advanced', value=modules.config.default_advanced_checkbox, container=False, elem_classes='min_check')
                
             with gr.Row(visible=False) as image_input_panel:
                 with gr.Tabs():
@@ -203,13 +202,13 @@ with shared.gradio_root:
                                     ip_ctrls.append(ip_image)
                                     with gr.Column(visible=False) as ad_col:
                                         with gr.Row():
-                                            # default_end, default_weight = flags.default_parameters[flags.default_ip]
+                                            default_end, default_weight = flags.default_parameters[flags.default_ip]
 
-                                            ip_stop = gr.Slider(label='Stop At', minimum=0.0, maximum=1.0, step=0.001, value=0.85, visible=False)
+                                            ip_stop = gr.Slider(label='Stop At', minimum=0.0, maximum=1.0, step=0.001, value=default_end)
                                             ip_stops.append(ip_stop)
                                             ip_ctrls.append(ip_stop)
 
-                                            ip_weight = gr.Slider(label='Weight', minimum=0.0, maximum=2.0, step=0.001, value=0.97, visible=False)
+                                            ip_weight = gr.Slider(label='Weight', minimum=0.0, maximum=2.0, step=0.001, value=default_weight)
                                             ip_weights.append(ip_weight)
                                             ip_ctrls.append(ip_weight)
 
@@ -225,8 +224,8 @@ with shared.gradio_root:
                         def ip_advance_checked(x):
                             return [gr.update(visible=x)] * len(ip_ad_cols) + \
                                 [flags.default_ip] * len(ip_types) + \
-                                [0.85] * len(ip_stops) + \
-                                [0.97] * len(ip_weights)
+                                [flags.default_parameters[flags.default_ip][0]] * len(ip_stops) + \
+                                [flags.default_parameters[flags.default_ip][1]] * len(ip_weights)
 
                         ip_advanced.change(ip_advance_checked, inputs=ip_advanced,
                                            outputs=ip_ad_cols + ip_types + ip_stops + ip_weights,
