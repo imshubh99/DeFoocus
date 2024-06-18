@@ -181,13 +181,7 @@ with shared.gradio_root:
                
             with gr.Row(visible=False) as image_input_panel:
                 with gr.Tabs():
-                    # with gr.TabItem(label='Upscale or Variation') as uov_tab:
-                    #     with gr.Row():
-                    #         with gr.Column():
-                    #             uov_input_image = grh.Image(label='Drag above image to here', source='upload', type='numpy')
-                    #         with gr.Column():
-                    #             uov_method = gr.Radio(label='Upscale or Variation:', choices=flags.uov_list, value=flags.disabled)
-                    #             gr.HTML('<a href="https://github.com/lllyasviel/Fooocus/discussions/390" target="_blank">\U0001F4D4 Document</a>')
+
                     with gr.TabItem(label='Image Prompt') as ip_tab:
                         with gr.Row():
                             ip_images = []
@@ -335,8 +329,7 @@ with shared.gradio_root:
                                         outputs=image_input_panel, queue=False, show_progress=False, _js=switch_js)
             ip_advanced.change(lambda: None, queue=False, show_progress=False, _js=down_js)
 
-            current_tab = gr.Textbox(value='uov', visible=False)
-            # uov_tab.select(lambda: 'uov', outputs=current_tab, queue=False, _js=down_js, show_progress=False)
+
             inpaint_tab.select(lambda: 'inpaint', outputs=current_tab, queue=False, _js=down_js, show_progress=False)
             ip_tab.select(lambda: 'ip', outputs=current_tab, queue=False, _js=down_js, show_progress=False)
             desc_tab.select(lambda: 'desc', outputs=current_tab, queue=False, _js=down_js, show_progress=False)
@@ -746,7 +739,6 @@ with shared.gradio_root:
 
         ctrls += [base_model, refiner_model, refiner_switch] + lora_ctrls
         ctrls += [input_image_checkbox, current_tab]
-        ctrls += [uov_method, uov_input_image]
         ctrls += [outpaint_selections, inpaint_input_image, inpaint_additional_prompt, inpaint_mask_image]
         ctrls += [disable_preview, disable_intermediate_results, black_out_nsfw]
         ctrls += [adm_scaler_positive, adm_scaler_negative, adm_scaler_end, adaptive_cfg]
@@ -816,14 +808,6 @@ with shared.gradio_root:
         desc_btn.click(trigger_describe, inputs=[desc_method, desc_input_image],
                        outputs=[prompt, style_selections], show_progress=True, queue=True)
 
-        def trigger_uov_describe(mode, img, prompt):
-            # keep prompt if not empty
-            if prompt == '':
-                return trigger_describe(mode, img)
-            return gr.update(), gr.update()
-
-        uov_input_image.upload(trigger_uov_describe, inputs=[desc_method, uov_input_image, prompt],
-                       outputs=[prompt, style_selections], show_progress=True, queue=True)
 
 def dump_default_english_config():
     from modules.localization import dump_english_config
