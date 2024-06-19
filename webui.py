@@ -100,7 +100,7 @@ def generate_clicked(task):
 
 reload_javascript()
 
-title = f'DeFooocus {fooocus_version.version}'
+title = f'fashionCORE {fooocus_version.version}'
 
 if isinstance(args_manager.args.preset, str):
     title += ' ' + args_manager.args.preset
@@ -114,7 +114,7 @@ with shared.gradio_root:
     currentTask = gr.State(worker.AsyncTask(args=[]))
     with gr.Row():
         with gr.Column(scale=2):
-            with gr.Tab("Generation"):
+            with gr.Tab("fashionCORE"):
                 with gr.Row():
                     progress_window = grh.Image(label='Preview', show_label=True, visible=False, height=768,
                                                 elem_classes=['main_view'])
@@ -175,8 +175,8 @@ with shared.gradio_root:
                     stop_button.click(stop_clicked, inputs=currentTask, outputs=currentTask, queue=False, show_progress=False, _js='cancelGenerateForever')
                     skip_button.click(skip_clicked, inputs=currentTask, outputs=currentTask, queue=False, show_progress=False)
             with gr.Row(elem_classes='advanced_check_row'):
-                input_image_checkbox = gr.Checkbox(label='Input Image', value=False, container=False, elem_classes='min_check')
-                advanced_checkbox = gr.Checkbox(label='Advanced', value=modules.config.default_advanced_checkbox, container=False, elem_classes='min_check')
+                input_image_checkbox = gr.Checkbox(label='Image Section', value=True, container=False, elem_classes='min_check')
+                advanced_checkbox = gr.Checkbox(label='Customization', value=modules.config.default_advanced_checkbox, container=False, elem_classes='min_check')
                
             with gr.Row(visible=False) as image_input_panel:
                 with gr.Tabs():
@@ -187,7 +187,7 @@ with shared.gradio_root:
                     #         with gr.Column():
                     #             uov_method = gr.Radio(label='Upscale or Variation:', choices=flags.uov_list, value=flags.disabled)
                     #             gr.HTML('<a href="https://github.com/lllyasviel/Fooocus/discussions/390" target="_blank">\U0001F4D4 Document</a>')
-                    with gr.TabItem(label='Image Prompt') as ip_tab:
+                    with gr.TabItem(label='Accessories Image') as ip_tab:
                         with gr.Row():
                             ip_images = []
                             ip_types = []
@@ -219,7 +219,7 @@ with shared.gradio_root:
                                         ip_type.change(lambda x: flags.default_parameters[x], inputs=[ip_type], outputs=[ip_stop, ip_weight], queue=False, show_progress=False)
                                     ip_ad_cols.append(ad_col)
                         ip_advanced = gr.Checkbox(label='Advanced', value=False, container=False)
-                        gr.HTML('* \"Image Prompt\" is powered by Fooocus Image Mixture Engine (v1.0.1). <a href="https://github.com/lllyasviel/Fooocus/discussions/557" target="_blank">\U0001F4D4 Document</a>')
+                        gr.HTML('* \"Image Prompt\" is powered by fashionCORE Image Mixture Engine (v1.0.1). <a href="https://github.com/lllyasviel/Fooocus/discussions/557" target="_blank">\U0001F4D4 Document</a>')
 
                         def ip_advance_checked(x):
                             return [gr.update(visible=x)] * len(ip_ad_cols) + \
@@ -231,10 +231,16 @@ with shared.gradio_root:
                                            outputs=ip_ad_cols + ip_types + ip_stops + ip_weights,
                                            queue=False, show_progress=False)
 
-                    with gr.TabItem(label='Inpaint or Outpaint') as inpaint_tab:
+                    with gr.TabItem(label='Person Image with Inpaint') as inpaint_tab:
                         with gr.Row():
                             with gr.Column():
-                                inpaint_input_image = grh.Image(label='Drag inpaint or outpaint image to here', source='upload', type='numpy', tool='sketch', height=500, brush_color="#FFFFFF", elem_id='inpaint_canvas')
+                                inpaint_input_image = grh.Image(label='Upload Person Image and Inpaint the Relevant Area', source='upload', type='numpy', tool='sketch', height=500, brush_color="#FFFFFF", elem_id='inpaint_canvas')
+                                gr.Markdown("""
+                                            **Directions:**
+                                            - **Step 1:** Drag and drop your image here.
+                                            - **Step 2:** Use the sketch tool to inpaint areas of body you want to make wear the Accessories from Acesssoriess Image.
+                                            - **Step 3:** Note: Do not inpaint the face/head areas for better results.
+                                            """)
                                 inpaint_mode = gr.Dropdown(choices=modules.flags.inpaint_options, value=modules.flags.inpaint_option_default, label='Method')
                                 inpaint_additional_prompt = gr.Textbox(placeholder="Describe what you want to inpaint.", elem_id='inpaint_additional_prompt', label='Inpaint Additional Prompt', visible=False)
                                 outpaint_selections = gr.CheckboxGroup(choices=['Left', 'Right', 'Top', 'Bottom'], value=[], label='Outpaint Direction')
@@ -242,7 +248,7 @@ with shared.gradio_root:
                                                                      label='Additional Prompt Quick List',
                                                                      components=[inpaint_additional_prompt],
                                                                      visible=False)
-                                gr.HTML('* Powered by Fooocus Inpaint Engine <a href="https://github.com/lllyasviel/Fooocus/discussions/414" target="_blank">\U0001F4D4 Document</a>')
+                                gr.HTML('* Powered by fashionCORE Inpaint Engine <a href="https://github.com/lllyasviel/Fooocus/discussions/414" target="_blank">\U0001F4D4 Document</a>')
                                 example_inpaint_prompts.click(lambda x: x[0], inputs=example_inpaint_prompts, outputs=inpaint_additional_prompt, show_progress=False, queue=False)
 
                             with gr.Column(visible=False) as inpaint_mask_generation_col:
@@ -349,7 +355,7 @@ with shared.gradio_root:
                 if not args_manager.args.disable_preset_selection:
                     preset_selection = gr.Radio(label='Preset',
                                                 choices=modules.config.available_presets,
-                                                value=args_manager.args.preset if args_manager.args.preset else "realistic",
+                                                value=args_manager.args.preset if args_manager.args.preset else "Initial",
                                                 interactive=True)
                 
                 aspect_ratios_selection = gr.Radio(label='Aspect Ratios', choices=modules.config.available_aspect_ratios,
@@ -471,7 +477,7 @@ with shared.gradio_root:
                 sharpness = gr.Slider(label='Image Sharpness', minimum=0.0, maximum=30.0, step=0.001,
                                       value=modules.config.default_sample_sharpness,
                                       info='Higher value means image and texture are sharper.')
-                gr.HTML('<a href="https://github.com/lllyasviel/Fooocus/discussions/117" target="_blank">\U0001F4D4 Document</a>')
+                gr.HTML('<a href="https://github.com/lllyasviel/fashonCORE/discussions/117" target="_blank">\U0001F4D4 Document</a>')
                 output_format = gr.Radio(label='Output Format',
                                             choices=modules.flags.output_formats,
                                             value=modules.config.default_output_format)
@@ -493,7 +499,7 @@ with shared.gradio_root:
 
                         adaptive_cfg = gr.Slider(label='CFG Mimicking from TSNR', minimum=1.0, maximum=30.0, step=0.01,
                                                  value=modules.config.default_cfg_tsnr,
-                                                 info='Enabling Fooocus\'s implementation of CFG mimicking for TSNR '
+                                                 info='Enabling fashionCORE\'s implementation of CFG mimicking for TSNR '
                                                       '(effective when real CFG > mimicked CFG).')
                         sampler_name = gr.Dropdown(label='Sampler', choices=flags.sampler_list,
                                                    value=modules.config.default_sampler)
@@ -580,7 +586,7 @@ with shared.gradio_root:
                         inpaint_engine = gr.Dropdown(label='Inpaint Engine',
                                                      value=modules.config.default_inpaint_engine_version,
                                                      choices=flags.inpaint_engine_versions,
-                                                     info='Version of Fooocus inpaint model')
+                                                     info='Version of fashionCORE inpaint model')
                         inpaint_strength = gr.Slider(label='Inpaint Denoising Strength',
                                                      minimum=0.0, maximum=1.0, step=0.001, value=1.0,
                                                      info='Same as the denoising strength in A1111 inpaint. '
