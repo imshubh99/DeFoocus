@@ -165,7 +165,7 @@ Windows: download the [7z file](#download), extract it and run `run.bat`. You ma
 
 | Colab | Info
 | --- | --- |
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/imshubh99/DeFooocus/blob/main/DeFooocus_GDrive_Integration.ipynb) | DeFooocus Official
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/imshubh99/DeFoocus/blob/main/DeFooocus.ipynb) | DeFooocus Official
 
 
 ### Linux (Using Anaconda)
