@@ -331,7 +331,7 @@ default_advanced_checkbox = get_config_item_or_set_default(
 )
 default_max_image_number = get_config_item_or_set_default(
     key='default_max_image_number',
-    default_value=64,
+    default_value=32,
     validator=lambda x: isinstance(x, int) and x >= 1
 )
 default_output_format = get_config_item_or_set_default(
@@ -366,7 +366,7 @@ available_aspect_ratios = get_config_item_or_set_default(
         '896*1152', '896*1088', '960*1088', '960*1024', '1024*1024', '1024*960',
         '1088*960', '1088*896', '1152*896', '1152*832', '1216*832', '1280*768',
         '1344*768', '1344*704', '1408*704', '1472*704', '1536*640', '1600*640',
-        '1664*576', '1728*576', '1152*768', '768*1152', '864*1080', '1280*720', '720*1280, '1024*768','768*1024'
+        '1664*576', '1728*576'
     ],
     validator=lambda x: isinstance(x, list) and all('*' in v for v in x) and len(x) > 1
 )
