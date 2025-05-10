@@ -30,15 +30,13 @@ custom_models = [
     {
         "url": (
             "https://civitai-delivery-worker-prod.5ac0637cfd0766c97916cefa3764fbdf."
-            "r2.cloudflarestorage.com/model/26957/realvisxlV50Lightning.Ng9I.safetensors?"
-            "response-content-disposition=attachment%3B%20filename%3D%22"
-            "realvisxlV50_v50LightningBakedvae.safetensors%22"
+            "r2.cloudflarestorage.com/model/6357/cyberrealisticxlplay.ohly.safetensors?"
+            "X-Amz-Expires=86400&response-content-disposition=attachment%3B%20filename%3D%22"
+            "cyberrealisticXL_v57.safetensors%22&X-Amz-Algorithm=AWS4-HMAC-SHA256"
         ),
-        "name": "realvisxlV50_v50LightningBakedvae.safetensors",
+        "name": "cyberrealisticXL_v57.safetensors",
         "dest_folder": "models/checkpoints"
     },
-    # Example VAE entry:
-    # {"url": "https://.../vae-ft-mse-840000-ema-pruned.ckpt", "name": "vae-ft-mse-840000-ema-pruned.ckpt", "dest_folder": "models/vae"},
 ]
 # ------------------------------------------------------
 
@@ -48,15 +46,14 @@ if preset != "default":
     g_args += f" --preset {preset}"
 
 # ------------------ Environment Setup ------------------
-from modules.launch_util import is_installed, run, python
+from modules.launch_util import run, python
 
 def prepare_environment():
-    # Install required Python packages
-    run_pip = run  # alias
-    run_pip(f'"{python}" -m pip install torch==2.1.0 torchvision==0.16.0 --extra-index-url https://download.pytorch.org/whl/cu121',
-            "Installing torch & torchvision", live=True)
-    # Install dependencies
-    run_pip(f"pip install -r requirements_versions.txt", "Installing requirements", live=False)
+    # Install PyTorch (with CUDA support)
+    run(f'"{python}" -m pip install torch==2.1.0 torchvision==0.16.0 --extra-index-url https://download.pytorch.org/whl/cu121',
+        "Installing torch & torchvision", live=True)
+    # Install other requirements
+    run(f"pip install -r requirements_versions.txt", "Installing requirements", live=False)
 
 # Git clone and install DeFooocus
 def setup_repo():
@@ -68,11 +65,10 @@ def setup_repo():
 
 # ------------------ Model Download ------------------
 def download_custom_models():
-    # Skip default model if skip flag present
-    skip_flag = os.path.join(os.getcwd(), 'skip_model_download.txt')
-    open(skip_flag, 'a').close()
+    # Skip default model download
+    open('skip_model_download.txt', 'a').close()
 
-    # Ensure folders and download
+    # Ensure folders and download each custom model
     for m in custom_models:
         folder = os.path.join(os.getcwd(), m['dest_folder'])
         os.makedirs(folder, exist_ok=True)
