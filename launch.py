@@ -1,128 +1,92 @@
+#@title DeFooocus Custom Model Launch with Custom Download
+#@markdown **Skip default model download & use your own model**
+
 import os
 import sys
 import ssl
 
-print('[System ARGV] ' + str(sys.argv))
+# Allow unverified SSL for downloads
+ssl._create_default_https_context = ssl._create_unverified_context
 
-root = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(root)
-os.chdir(root)
-
+# Memory and device configs
 os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
 os.environ["PYTORCH_MPS_HIGH_WATERMARK_RATIO"] = "0.0"
 if "GRADIO_SERVER_PORT" not in os.environ:
     os.environ["GRADIO_SERVER_PORT"] = "7865"
 
-ssl._create_default_https_context = ssl._create_unverified_context
+# Debug launch args
+print('[System ARGV] ' + str(sys.argv))
 
+# ---------------------- Settings ----------------------
+# Basic UI and performance flags
+theme = "dark"  #@param ["dark", "light"]
+preset = "default"  #@param ["default", "realistic", "anime", "lcm", "sai", "turbo", "lighting", "hypersd", "playground_v2.5", "dpo", "spo", "sd1.5"]
+advanced_args = (
+    "--share --attention-split --always-high-vram "
+    "--disable-offload-from-vram --all-in-fp16 --lowvram --gpu-id 0"
+)  # Added lowvram for memory
+# Custom model definition: add more tuples for multiple custom models
+custom_models = [
+    {
+        "url": (
+            "https://civitai-delivery-worker-prod.5ac0637cfd0766c97916cefa3764fbdf."
+            "r2.cloudflarestorage.com/model/26957/realvisxlV50Lightning.Ng9I.safetensors?"
+            "response-content-disposition=attachment%3B%20filename%3D%22"
+            "realvisxlV50_v50LightningBakedvae.safetensors%22"
+        ),
+        "name": "realvisxlV50_v50LightningBakedvae.safetensors",
+        "dest_folder": "models/checkpoints"
+    },
+    # Example VAE entry:
+    # {"url": "https://.../vae-ft-mse-840000-ema-pruned.ckpt", "name": "vae-ft-mse-840000-ema-pruned.ckpt", "dest_folder": "models/vae"},
+]
+# ------------------------------------------------------
 
-import platform
-import fooocus_version
+# Build CLI args
+g_args = f"{advanced_args} --theme {theme}"
+if preset != "default":
+    g_args += f" --preset {preset}"
 
-from build_launcher import build_launcher
-from modules.launch_util import is_installed, run, python, run_pip, requirements_met
-from modules.model_loader import load_file_from_url
-
-REINSTALL_ALL = False
-TRY_INSTALL_XFORMERS = False
-
+# ------------------ Environment Setup ------------------
+from modules.launch_util import is_installed, run, python
 
 def prepare_environment():
-    torch_index_url = os.environ.get('TORCH_INDEX_URL', "https://download.pytorch.org/whl/cu121")
-    torch_command = os.environ.get('TORCH_COMMAND',
-                                   f"pip install torch==2.1.0 torchvision==0.16.0 --extra-index-url {torch_index_url}")
-    requirements_file = os.environ.get('REQS_FILE', "requirements_versions.txt")
+    # Install required Python packages
+    run_pip = run  # alias
+    run_pip(f'"{python}" -m pip install torch==2.1.0 torchvision==0.16.0 --extra-index-url https://download.pytorch.org/whl/cu121',
+            "Installing torch & torchvision", live=True)
+    # Install dependencies
+    run_pip(f"pip install -r requirements_versions.txt", "Installing requirements", live=False)
 
-    print(f"Python {sys.version}")
-    print(f"Fooocus version: {fooocus_version.version}")
+# Git clone and install DeFooocus
+def setup_repo():
+    run('pip install pygit2==1.12.2', "Installing pygit2")
+    if not os.path.isdir('DeFooocus'):
+        run('git clone https://github.com/imshubh99/DeFooocus', "Cloning DeFooocus")
+    os.chdir('DeFooocus')
+    run('pip install -r requirements_versions.txt', "Installing repo requirements")
 
-    if REINSTALL_ALL or not is_installed("torch") or not is_installed("torchvision"):
-        run(f'"{python}" -m {torch_command}', "Installing torch and torchvision", "Couldn't install torch", live=True)
+# ------------------ Model Download ------------------
+def download_custom_models():
+    # Skip default model if skip flag present
+    skip_flag = os.path.join(os.getcwd(), 'skip_model_download.txt')
+    open(skip_flag, 'a').close()
 
-    if TRY_INSTALL_XFORMERS:
-        if REINSTALL_ALL or not is_installed("xformers"):
-            xformers_package = os.environ.get('XFORMERS_PACKAGE', 'xformers==0.0.20')
-            if platform.system() == "Windows":
-                if platform.python_version().startswith("3.10"):
-                    run_pip(f"install -U -I --no-deps {xformers_package}", "xformers", live=True)
-                else:
-                    print("Installation of xformers is not supported in this version of Python.")
-                    print(
-                        "You can also check this and build manually: https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/Xformers#building-xformers-on-windows-by-duckness")
-                    if not is_installed("xformers"):
-                        exit(0)
-            elif platform.system() == "Linux":
-                run_pip(f"install -U -I --no-deps {xformers_package}", "xformers")
+    # Ensure folders and download
+    for m in custom_models:
+        folder = os.path.join(os.getcwd(), m['dest_folder'])
+        os.makedirs(folder, exist_ok=True)
+        dest = os.path.join(folder, m['name'])
+        if not os.path.exists(dest):
+            print(f"Downloading custom model: {m['name']}")
+            run(f'wget -O "{dest}" "{m["url"]}"', "Downloading model")
 
-    if REINSTALL_ALL or not requirements_met(requirements_file):
-        run_pip(f"install -r \"{requirements_file}\"", "requirements")
+# ---------------------- Launch ----------------------
+if __name__ == '__main__':
+    prepare_environment()
+    setup_repo()
+    download_custom_models()
 
-    return
-
-
-vae_approx_filenames = [
-    ('xlvaeapp.pth', 'https://huggingface.co/lllyasviel/misc/resolve/main/xlvaeapp.pth'),
-    ('vaeapp_sd15.pth', 'https://huggingface.co/lllyasviel/misc/resolve/main/vaeapp_sd15.pt'),
-    ('xl-to-v1_interposer-v3.1.safetensors',
-     'https://huggingface.co/lllyasviel/misc/resolve/main/xl-to-v1_interposer-v3.1.safetensors')
-]
-
-
-def ini_args():
-    from args_manager import args
-    return args
-
-
-prepare_environment()
-build_launcher()
-args = ini_args()
-
-if args.gpu_device_id is not None:
-    os.environ['CUDA_VISIBLE_DEVICES'] = str(args.gpu_device_id)
-    print("Set device to:", args.gpu_device_id)
-
-from modules import config
-os.environ["U2NET_HOME"] = config.path_inpaint
-
-
-def download_models(default_model, previous_default_models, checkpoint_downloads, embeddings_downloads, lora_downloads):
-    for file_name, url in vae_approx_filenames:
-        load_file_from_url(url=url, model_dir=config.path_vae_approx, file_name=file_name)
-
-    load_file_from_url(
-        url='https://huggingface.co/lllyasviel/misc/resolve/main/fooocus_expansion.bin',
-        model_dir=config.path_fooocus_expansion,
-        file_name='pytorch_model.bin'
-    )
-
-    if args.disable_preset_download:
-        print('Skipped model download.')
-        return
-
-    if not args.always_download_new_model:
-        if not os.path.exists(os.path.join(config.path_checkpoints, default_model)):
-            for alternative_model_name in previous_default_models:
-                if os.path.exists(os.path.join(config.path_checkpoints, alternative_model_name)):
-                    print(f'You do not have [{default_model}] but you have [{alternative_model_name}].')
-                    print(f'Fooocus will use [{alternative_model_name}] to avoid downloading new models, '
-                          f'but you are not using the latest models.')
-                    print('Use --always-download-new-model to avoid fallback and always get new models.')
-                    checkpoint_downloads = {}
-                    default_model = alternative_model_name
-                    break
-
-    for file_name, url in checkpoint_downloads.items():
-        load_file_from_url(url=url, model_dir=config.path_checkpoints, file_name=file_name)
-    for file_name, url in embeddings_downloads.items():
-        load_file_from_url(url=url, model_dir=config.path_embeddings, file_name=file_name)
-    for file_name, url in lora_downloads.items():
-        load_file_from_url(url=url, model_dir=config.path_loras, file_name=file_name)
-
-    return default_model, checkpoint_downloads
-
-
-config.default_base_model_name, config.checkpoint_downloads = download_models(
-    config.default_base_model_name, config.previous_default_models, config.checkpoint_downloads,
-    config.embeddings_downloads, config.lora_downloads)
-
-from webui import *
+    # Start the UI using entry_with_update.py
+    print("[DeFooocus] Starting with custom models ...")
+    run(f"{python} entry_with_update.py {g_args}", "Launching DeFooocus UI")
