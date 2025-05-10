@@ -1,27 +1,46 @@
-import os
+\import os
 import sys
-import subprocess
+
 
 root = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(root)
 os.chdir(root)
 
-def download_model(url, target_path):
-    if not os.path.exists(target_path):
-        print(f"[Custom] Downloading {target_path}")
-        subprocess.run(["wget", "-O", target_path, url], check=True)
-    else:
-        print(f"[Custom] Exists: {target_path}")
 
-# === Folders ===
-os.makedirs("models/checkpoints", exist_ok=True)
-os.makedirs("models/vae", exist_ok=True)
-os.makedirs("models/controlnet", exist_ok=True)
+try:
+    import pygit2
+    pygit2.option(pygit2.GIT_OPT_SET_OWNER_VALIDATION, 0)
 
-# === Model Downloads (Customize URLs) ===
-download_model("https://cdn-lfs.hf.co/repos/28/bd/28bdd0d1412f6be5c8b6b66f41d0285200cf6546186fc9cb237b5db186a4a0a8/15012c538f503ce2ebfc2c8547b268c75ccdaff7a281db55399940ff1d70e21d?response-content-disposition=inline%3B+filename*%3DUTF-8%27%27realisticVisionV51_v51VAE.safetensors%3B+filename%3D%22realisticVisionV51_v51VAE.safetensors%22%3B&Expires=1746889286&Policy=eyJTdGF0ZW1lbnQiOlt7IkNvbmRpdGlvbiI6eyJEYXRlTGVzc1RoYW4iOnsiQVdTOkVwb2NoVGltZSI6MTc0Njg4OTI4Nn19LCJSZXNvdXJjZSI6Imh0dHBzOi8vY2RuLWxmcy5oZi5jby9yZXBvcy8yOC9iZC8yOGJkZDBkMTQxMmY2YmU1YzhiNmI2NmY0MWQwMjg1MjAwY2Y2NTQ2MTg2ZmM5Y2IyMzdiNWRiMTg2YTRhMGE4LzE1MDEyYzUzOGY1MDNjZTJlYmZjMmM4NTQ3YjI2OGM3NWNjZGFmZjdhMjgxZGI1NTM5OTk0MGZmMWQ3MGUyMWQ%7EcmVzcG9uc2UtY29udGVudC1kaXNwb3NpdGlvbj0qIn1dfQ__&Signature=knupvK8urUFMyfkblIuna6xhE8TqS2Z0BXLSJarj91wK%7EkGcZ1zNsIO4GdceyYctpUC%7EAodsQUOr1juxvffeeZ8qmxmIktBVtRkoXKe3k64Cea0aY43a6PgqdSjFziVO%7E1wNik455fcj%7EJuQiYGVyyjozJG1Wl05fjNQ3RPDfs1GvyPh5sBv8FXuztAHXFULSTZjt2J4Zu62s%7ETQlf6SyTaFA%7EhyzCcr361I3iOk276KRGrA3DiQhCr-bevKQDFqAJK-%7EQTHnW9olwQBJ4-NjZLLrh4wZ3o91rlRRIVAVvnICixZASnwLz4mepzPpUSzGDGLTLvSbBBKG4LKx6PQYQ__&Key-Pair-Id=K3RPWS32NSSJCE", "models/checkpoints/realisticVisionV51_v51VAE.safetensors")
-download_model("https://cdn-lfs.hf.co/repos/ec/ee/eceee26c5834d8a75cf04eeb17dfc06d1d5fe1d80c2f19520b148c11e2e98c45/c6a580b13a5bc05a5e16e4dbb80608ff2ec251a162311590c1f34c013d7f3dab?response-content-disposition=inline%3B+filename*%3DUTF-8%27%27vae-ft-mse-840000-ema-pruned.ckpt%3B+filename%3D%22vae-ft-mse-840000-ema-pruned.ckpt%22%3B&Expires=1746889594&Policy=eyJTdGF0ZW1lbnQiOlt7IkNvbmRpdGlvbiI6eyJEYXRlTGVzc1RoYW4iOnsiQVdTOkVwb2NoVGltZSI6MTc0Njg4OTU5NH19LCJSZXNvdXJjZSI6Imh0dHBzOi8vY2RuLWxmcy5oZi5jby9yZXBvcy9lYy9lZS9lY2VlZTI2YzU4MzRkOGE3NWNmMDRlZWIxN2RmYzA2ZDFkNWZlMWQ4MGMyZjE5NTIwYjE0OGMxMWUyZTk4YzQ1L2M2YTU4MGIxM2E1YmMwNWE1ZTE2ZTRkYmI4MDYwOGZmMmVjMjUxYTE2MjMxMTU5MGMxZjM0YzAxM2Q3ZjNkYWI%7EcmVzcG9uc2UtY29udGVudC1kaXNwb3NpdGlvbj0qIn1dfQ__&Signature=MwkHm0zIzI9oak00KzUCL7Gg%7EcH4ia5wsKh92-6VOe69VP1K661ylWxBZRgwkjcclAEKhrza9tFWs67CuTtgbosn8R2PpPqxhCIlYNkz8CXeIb1Yhq8A223IKD2vCO6kj8ZOTWWDNQPmSDT3oZGkZChDmDH-IAQANANiwnIcXXWkahOmmN5fStKTP%7EgXAAHDTFKIBNcmzH-alsJGXQ-6zUjYSMZgDwz5sY9aFT3H6FR8j14fjYWoQZKWswztRYnoarRkVgfkIk-LE9PjGOrSVimlGQQskAy814hxBwAPhwapLjC-A-Ld2pHATxU3dvyO6wu%7E5eU47%7E2MaCv%7EurqEdw__&Key-Pair-Id=K3RPWS32NSSJCE", "models/vae/vae-ft-mse-840000-ema-pruned.ckpt")
-download_model("https://cdn-lfs.hf.co/repos/f6/65/f665e553e8fd16131981a96c629e785939f08080bb3cbf8d2b7f5ddbd9e6100a/4de384b16bc2d7a1fb258ca0cbd941d7dd0a721ae996aff89f905299d6923f45?response-content-disposition=inline%3B+filename*%3DUTF-8%27%27control_sd15_canny.pth%3B+filename%3D%22control_sd15_canny.pth%22%3B&Expires=1746889690&Policy=eyJTdGF0ZW1lbnQiOlt7IkNvbmRpdGlvbiI6eyJEYXRlTGVzc1RoYW4iOnsiQVdTOkVwb2NoVGltZSI6MTc0Njg4OTY5MH19LCJSZXNvdXJjZSI6Imh0dHBzOi8vY2RuLWxmcy5oZi5jby9yZXBvcy9mNi82NS9mNjY1ZTU1M2U4ZmQxNjEzMTk4MWE5NmM2MjllNzg1OTM5ZjA4MDgwYmIzY2JmOGQyYjdmNWRkYmQ5ZTYxMDBhLzRkZTM4NGIxNmJjMmQ3YTFmYjI1OGNhMGNiZDk0MWQ3ZGQwYTcyMWFlOTk2YWZmODlmOTA1Mjk5ZDY5MjNmNDU%7EcmVzcG9uc2UtY29udGVudC1kaXNwb3NpdGlvbj0qIn1dfQ__&Signature=Jfu35u2tMnZlWtF3IXOuICvSf-3PnLu03DRNQS4PVW1LaVtxCgS6z4%7E0E4AskXKQTZiIWj1BuYVxarLF7tEEPTWDQcEzXiyeS1VHKcgrCp0rLN96LWAgFf1Tcs11XvNZdYLXFijUpv9KXtWkR%7Eehx3Ujymh75I-vvYuK9HgHTNli-jBLuFV%7E4F9fk6FrROZjP8ajwA-owNQM2LQ9kBKAX0KGm3YuWGhkcOe8QqPeFrcROVkFlnH4v3PxbiySJgvWwGLLS606covMUhAPnLNt4OuajxhKeUKdwe4wDTbmCTo2enjBS7IWcOYS3-HH2%7E5h3jjuP2jlqwZ8KPy9Y9un7A__&Key-Pair-Id=K3RPWS32NSSJCE", "models/controlnet/control_sd15_canny.pth")
+    repo = pygit2.Repository(os.path.abspath(os.path.dirname(__file__)))
 
-# === Launch App ===
+    branch_name = repo.head.shorthand
+
+    remote_name = 'origin'
+    remote = repo.remotes[remote_name]
+
+    remote.fetch()
+
+    local_branch_ref = f'refs/heads/{branch_name}'
+    local_branch = repo.lookup_reference(local_branch_ref)
+
+    remote_reference = f'refs/remotes/{remote_name}/{branch_name}'
+    remote_commit = repo.revparse_single(remote_reference)
+
+    merge_result, _ = repo.merge_analysis(remote_commit.id)
+
+    if merge_result & pygit2.GIT_MERGE_ANALYSIS_UP_TO_DATE:
+        print("Already up-to-date")
+    elif merge_result & pygit2.GIT_MERGE_ANALYSIS_FASTFORWARD:
+        local_branch.set_target(remote_commit.id)
+        repo.head.set_target(remote_commit.id)
+        repo.checkout_tree(repo.get(remote_commit.id))
+        repo.reset(local_branch.target, pygit2.GIT_RESET_HARD)
+        print("Fast-forward merge")
+    elif merge_result & pygit2.GIT_MERGE_ANALYSIS_NORMAL:
+        print("Update failed - Did you modify any file?")
+except Exception as e:
+    print('Update failed.')
+    print(str(e))
+
+print('Update succeeded.')
 from launch import *
