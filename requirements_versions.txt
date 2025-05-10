@@ -19,5 +19,5 @@ onnxruntime==1.18.0
 timm==0.9.16
 translators==5.9.6
 rembg==2.0.57
-groundingdino-py==0.4.1
+groundingdino-py==0.3.0
 huggingface_hub==0.23.0
